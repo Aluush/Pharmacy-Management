@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.DashboardController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+    <content>
+        <VBox spacing="16" styleClass="content-area">
+            <!-- Header -->
+            <HBox>
+                <children>
+                    <Label text="Dashboard" styleClass="section-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Refresh" onAction="#onRefresh"/>
+                </children>
+            </HBox>
+
+            <!-- KPI Cards -->
+            <HBox spacing="16">
+                <children>
+                    <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Today's Sales" styleClass="metric-title"/>
+                            <Label fx:id="metricSalesToday" text="\$0.00" styleClass="metric-value"/>
+                            <Label fx:id="metricSalesDelta" text="+0.0% from yesterday" style="-fx-text-fill: -color-text-muted;"/>
+                        </children>
+                    </VBox>
+
+                    <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Items in Stock" styleClass="metric-title"/>
+                            <Label fx:id="metricInStock" text="0" styleClass="metric-value"/>
+                            <Label text="Across all categories" style="-fx-text-fill: -color-text-muted;"/>
+                        </children>
+                    </VBox>
+
+                    <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Low Stock Alerts" styleClass="metric-title"/>
+                            <Label fx:id="metricLowStock" text="0" styleClass="metric-value"/>
+                            <Label text="Below reorder level" style="-fx-text-fill: -color-text-muted;"/>
+                        </children>
+                    </VBox>
+
+                    <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Expiring Soon" styleClass="metric-title"/>
+                            <Label fx:id="metricExpiring" text="0" styleClass="metric-value"/>
+                            <Label text="Next 30 days" style="-fx-text-fill: -color-text-muted;"/>
+                        </children>
+                    </VBox>
+                </children>
+            </HBox>
+
+            <!-- Charts -->
+            <HBox spacing="16">
+                <children>
+                    <VBox spacing="8" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Weekly Sales" styleClass="section-title"/>
+                            <LineChart fx:id="salesLineChart" title="" createSymbols="false" legendVisible="false">
+                                <xAxis>
+                                    <CategoryAxis label="Day"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Amount"/>
+                                </yAxis>
+                            </LineChart>
+                        </children>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label text="Stock by Category" styleClass="section-title"/>
+                            <PieChart fx:id="stockPieChart" legendVisible="true"/>
+                        </children>
+                    </VBox>
+                </children>
+            </HBox>
+
+            <!-- Recent Sales Table -->
+            <VBox spacing="8" styleClass="card">
+                <children>
+                    <Label text="Recent Sales" styleClass="section-title"/>
+                    <TableView fx:id="recentSalesTable" prefHeight="280">
+                        <columns>
+                            <TableColumn fx:id="colSaleId" text="Sale #" prefWidth="90"/>
+                            <TableColumn fx:id="colSaleItem" text="Item" prefWidth="240"/>
+                            <TableColumn fx:id="colSaleQty" text="Qty" prefWidth="80"/>
+                            <TableColumn fx:id="colSaleTotal" text="Total" prefWidth="120"/>
+                            <TableColumn fx:id="colSaleDate" text="Date" prefWidth="160"/>
+                        </columns>
+                    </TableView>
+                </children>
+            </VBox>
+        </VBox>
+    </content>
+    <padding>
+        <Insets top="0" right="0" bottom="8" left="0"/>
+    </padding>
+</ScrollPane>

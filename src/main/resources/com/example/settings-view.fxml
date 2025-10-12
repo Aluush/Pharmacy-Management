@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.SettingsController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+    <content>
+        <VBox spacing="16" styleClass="content-area">
+            <!-- Header -->
+            <HBox>
+                <children>
+                    <Label text="Settings" styleClass="section-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Save All" onAction="#onSaveAll"/>
+                </children>
+            </HBox>
+
+            <!-- Appearance -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="Appearance" styleClass="section-title"/>
+                    <HBox spacing="8">
+                        <children>
+                            <Button text="Light Mode" onAction="#onLightMode" styleClass="ghost-button"/>
+                            <Button text="Dark Mode" onAction="#onDarkMode"/>
+                        </children>
+                    </HBox>
+                    <Label fx:id="appearanceStatus" text="" style="-fx-text-fill: -color-text-muted;"/>
+                </children>
+            </VBox>
+
+            <!-- User Profile -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="User Profile" styleClass="section-title"/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <children>
+                                <Label text="Full Name"/>
+                                <TextField fx:id="fullNameField" promptText="e.g. John Doe"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <children>
+                                <Label text="Email"/>
+                                <TextField fx:id="emailField" promptText="john@domain.com"/>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <children>
+                                <Label text="Phone"/>
+                                <TextField fx:id="phoneField" promptText="+212 600 00 00 00"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <children>
+                                <Label text="Role"/>
+                                <ComboBox fx:id="roleBox" promptText="Select role"/>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <children>
+                                <Label text="Password"/>
+                                <PasswordField fx:id="passwordField" promptText="New password"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <children>
+                                <Label text="Confirm Password"/>
+                                <PasswordField fx:id="confirmPasswordField" promptText="Confirm new password"/>
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                            <children>
+                                <Button text="Reset" onAction="#onResetProfile" styleClass="ghost-button"/>
+                                <Button text="Update Profile" onAction="#onUpdateProfile"/>
+                            </children>
+                        </HBox>
+                    </GridPane>
+                    <Label fx:id="profileStatus" text="" style="-fx-text-fill: -color-text-muted;"/>
+                </children>
+            </VBox>
+
+            <!-- Backup / Restore -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="Backup &#38; Restore" styleClass="section-title"/>
+                    <HBox spacing="8">
+                        <children>
+                            <Button text="Backup Now" onAction="#onBackup" />
+                            <Button text="Restore" onAction="#onRestore" styleClass="ghost-button"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Last backup:" style="-fx-text-fill: -color-text-muted;"/>
+                            <Label fx:id="lastBackupLabel" text="Never" styleClass="badge"/>
+                        </children>
+                    </HBox>
+                    <Label fx:id="backupStatus" text="" style="-fx-text-fill: -color-text-muted;"/>
+                </children>
+            </VBox>
+        </VBox>
+    </content>
+    <padding>
+        <Insets top="0" right="0" bottom="8" left="0"/>
+    </padding>
+</ScrollPane>

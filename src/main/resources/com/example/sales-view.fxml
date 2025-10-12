@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.SalesController">
+
+    <top>
+        <HBox spacing="12" styleClass="content-area" alignment="CENTER_LEFT">
+            <children>
+                <Label text="Sales" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="customerField" promptText="Customer name / phone..." prefWidth="260"/>
+                <DatePicker fx:id="datePicker"/>
+                <Button text="New Sale" onAction="#onNewSale" styleClass="ghost-button"/>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16" styleClass="content-area">
+
+            <!-- Add Item Card -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="Add Item" styleClass="section-title"/>
+                    <GridPane hgap="16" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="25"/>
+                            <ColumnConstraints percentWidth="25"/>
+                        </columnConstraints>
+
+                        <Label text="Item" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="itemField" promptText="e.g. Paracetamol 500mg" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                        <Label text="Qty" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <TextField fx:id="qtyField" promptText="1" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Unit Price" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="priceField" promptText="0.00" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+                        <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnSpan="3" GridPane.rowIndex="2">
+                            <children>
+                                <Button text="Add" onAction="#onAddItem" defaultButton="true"/>
+                                <Button text="Clear" onAction="#onClearItem" styleClass="ghost-button"/>
+                                <Label fx:id="addStatus" text="" />
+                            </children>
+                        </HBox>
+                    </GridPane>
+                </children>
+            </VBox>
+
+            <!-- Items Table -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="Cart Items" styleClass="section-title"/>
+                    <TableView fx:id="table" prefHeight="360" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colItem" text="Item" prefWidth="360"/>
+                            <TableColumn fx:id="colQty" text="Qty" prefWidth="90"/>
+                            <TableColumn fx:id="colPrice" text="Unit Price" prefWidth="120"/>
+                            <TableColumn fx:id="colLineTotal" text="Line Total" prefWidth="140"/>
+                        </columns>
+                    </TableView>
+                </children>
+            </VBox>
+
+            <!-- Totals + Actions -->
+            <HBox spacing="16" alignment="CENTER_LEFT">
+                <children>
+                    <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+                        <children>
+                            <GridPane hgap="16" vgap="10">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="60"/>
+                                    <ColumnConstraints percentWidth="40"/>
+                                </columnConstraints>
+
+                                <Label text="Subtotal" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <Label fx:id="lblSubtotal" text="\$0.00" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                <Label text="Discount (%)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <TextField fx:id="discountField" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                <Label text="Tax (%)" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <TextField fx:id="taxField" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                <Label text="Grand Total" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                <Label fx:id="lblGrandTotal" text="\$0.00" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            </GridPane>
+                        </children>
+                    </VBox>
+
+                    <VBox spacing="8" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                        <children>
+                            <HBox spacing="8" alignment="CENTER_RIGHT">
+                                <children>
+                                    <Button text="Remove Selected" onAction="#onRemoveSelected" styleClass="ghost-button"/>
+                                    <Button text="Clear Cart" onAction="#onClearCart" styleClass="ghost-button"/>
+                                </children>
+                            </HBox>
+                            <HBox spacing="8" alignment="CENTER_RIGHT">
+                                <children>
+                                    <Button text="Hold" onAction="#onHold" styleClass="ghost-button"/>
+                                    <Button text="Checkout" onAction="#onCheckout"/>
+                                </children>
+                            </HBox>
+                            <Label fx:id="checkoutStatus" text=""/>
+                        </children>
+                    </VBox>
+                </children>
+            </HBox>
+
+        </VBox>
+    </center>
+
+    <padding>
+        <Insets top="0" right="0" bottom="8" left="0"/>
+    </padding>
+</BorderPane>
