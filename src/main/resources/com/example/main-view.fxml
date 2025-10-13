@@ -6,47 +6,85 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.MainController"
-            prefWidth="1200" prefHeight="800">
+            prefWidth="1200" prefHeight="800" styleClass="root">
 
     <!-- Top Bar -->
     <top>
-        <HBox spacing="16" styleClass="topbar">
+        <VBox spacing="0">
             <children>
-                <Label text="PharmaPro" styleClass="app-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <TextField fx:id="searchField" promptText="Search drugs, invoices, suppliers..." maxWidth="360"/>
-                <ToggleButton fx:id="themeToggle" text="Dark" onAction="#onToggleTheme" styleClass="ghost-button"/>
-                <Button text="Notifications" styleClass="ghost-button"/>
-                <MenuButton text="User" styleClass="menu-button">
-                    <items>
-                        <MenuItem text="Profile" onAction="#onProfile"/>
-                        <MenuItem text="Settings" onAction="#showSettings"/>
-                        <MenuItem text="Logout" onAction="#onLogout"/>
-                    </items>
-                </MenuButton>
+                <HBox spacing="16" styleClass="topbar">
+                    <children>
+                        <Button text="☰" onAction="#toggleSidebar" styleClass="ghost-button"/>
+                        <Label text="PharmaPro" styleClass="app-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="searchField" promptText="Search drugs, invoices, suppliers..." maxWidth="360"/>
+                        <ToggleButton fx:id="themeToggle" text="Dark" onAction="#onToggleTheme" styleClass="ghost-button"/>
+                        <Button text="Notifications" styleClass="ghost-button"/>
+                        <MenuButton text="User" styleClass="menu-button">
+                            <items>
+                                <MenuItem text="Profile" onAction="#onProfile"/>
+                                <MenuItem text="Settings" onAction="#showSettings"/>
+                                <MenuItem text="Logout" onAction="#onLogout"/>
+                            </items>
+                        </MenuButton>
+                    </children>
+                    <padding>
+                        <Insets top="12" right="16" bottom="12" left="16"/>
+                    </padding>
+                </HBox>
             </children>
-            <padding>
-                <Insets top="12" right="16" bottom="12" left="16"/>
-            </padding>
-        </HBox>
+        </VBox>
     </top>
+
 
     <!-- Sidebar Navigation -->
     <left>
-        <VBox spacing="8" styleClass="sidebar">
-            <children>
-                <Label text="Navigation" styleClass="sidebar-title"/>
-                <ToggleButton fx:id="btnDashboard" text="🏠  Dashboard" onAction="#showDashboard" selected="true"/>
-                <ToggleButton fx:id="btnInventory" text="💊  Inventory" onAction="#showInventory"/>
-                <ToggleButton fx:id="btnSales" text="🧾  Sales" onAction="#showSales"/>
-                <ToggleButton fx:id="btnSettings" text="⚙️  Settings" onAction="#showSettings"/>
-                <Region VBox.vgrow="ALWAYS"/>
-                <Label text="© PharmaPro" styleClass="sidebar-footer"/>
-            </children>
-            <padding>
-                <Insets top="16" right="12" bottom="16" left="12"/>
-            </padding>
-        </VBox>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="sidebar-scroll">
+            <content>
+                <VBox fx:id="sidebar" id="sidebar" spacing="8" styleClass="sidebar pro" style="-fx-background-color: linear-gradient(to bottom, -color-surface, derive(-color-surface, -3%), derive(-color-surface, -6%)); -fx-background-insets: 0; -fx-background-radius: 16; -fx-border-color: transparent -color-border transparent transparent; -fx-border-width: 0 1 0 0; -fx-padding: 16;">
+                    <children>
+                        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="brand">
+                            <children>
+                                <Label text="🧪" styleClass="logo"/>
+                                <Label text="PharmaPro" styleClass="name"/>
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="6" styleClass="user-card">
+                            <children>
+                                <Label text="🧑" styleClass="avatar"/>
+                                <Label fx:id="sidebarUserLabel" id="sidebarUserLabel" text="Guest" styleClass="user-name"/>
+                                <Label text="Pharmacist" styleClass="user-role"/>
+                            </children>
+                        </VBox>
+
+                        <Label text="Main" styleClass="sidebar-title"/>
+
+                        <ToggleButton fx:id="btnDashboard" text="Dashboard" onAction="#showDashboard" selected="true" styleClass="nav-button">
+                            <graphic><Label text="🏠"/></graphic>
+                        </ToggleButton>
+                        <ToggleButton fx:id="btnInventory" text="Inventory" onAction="#showInventory" styleClass="nav-button">
+                            <graphic><Label text="💊"/></graphic>
+                        </ToggleButton>
+                        <ToggleButton fx:id="btnSales" text="Sales" onAction="#showSales" styleClass="nav-button">
+                            <graphic><Label text="🧾"/></graphic>
+                        </ToggleButton>
+
+                        <Label text="System" styleClass="sidebar-title"/>
+
+                        <ToggleButton fx:id="btnSettings" text="Settings" onAction="#showSettings" styleClass="nav-button">
+                            <graphic><Label text="⚙️"/></graphic>
+                        </ToggleButton>
+
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Button text="Collapse" onAction="#toggleSidebar" styleClass="ghost-button"/>
+                    </children>
+                    <padding>
+                        <Insets top="16" right="12" bottom="16" left="12"/>
+                    </padding>
+                </VBox>
+            </content>
+        </ScrollPane>
     </left>
 
     <!-- Main Content -->
@@ -62,7 +100,7 @@
             <children>
                 <Label fx:id="dbStatusLabel" text="DB: Connected" styleClass="badge"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="userStatusLabel" text="User: Guest" />
+                <Label fx:id="userStatusLabel" id="userStatusLabel" text="User: Guest" />
                 <Label fx:id="timeLabel" text="--:--:--" />
             </children>
             <padding>

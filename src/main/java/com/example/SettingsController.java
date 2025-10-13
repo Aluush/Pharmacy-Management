@@ -91,7 +91,15 @@ public class SettingsController {
             if (pass.length() < 6) { setProfileStatus("Password must be at least 6 characters.", true); return; }
         }
 
-        // Stub: persist profile settings
+        // Persist to session and update app shell
+        Session.setUser(email, name);
+        Scene scene = App.getPrimaryScene();
+        if (scene != null) {
+            Label u = (Label) scene.lookup("#userStatusLabel");
+            if (u != null) u.setText("User: " + Session.getDisplayName());
+            Label s = (Label) scene.lookup("#sidebarUserLabel");
+            if (s != null) s.setText(Session.getDisplayName());
+        }
         setProfileStatus("Profile updated successfully.", false);
     }
 

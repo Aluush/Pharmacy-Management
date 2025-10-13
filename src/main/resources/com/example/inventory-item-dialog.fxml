@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.InventoryItemDialogController"
+            headerText="Inventory Item">
+    <buttonTypes>
+        <ButtonType text="Cancel" buttonData="CANCEL_CLOSE"/>
+        <ButtonType text="Save" buttonData="OK_DONE"/>
+    </buttonTypes>
+    <content>
+        <GridPane hgap="16" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50"/>
+                <ColumnConstraints percentWidth="50"/>
+            </columnConstraints>
+
+            <!-- Row 0 -->
+            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <children>
+                    <Label text="Name"/>
+                    <TextField fx:id="nameField" promptText="e.g. Paracetamol 500mg"/>
+                </children>
+            </VBox>
+            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <children>
+                    <Label text="Category"/>
+                    <ComboBox fx:id="categoryBox" promptText="Select category"/>
+                </children>
+            </VBox>
+
+            <!-- Row 1 -->
+            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <children>
+                    <Label text="Batch No"/>
+                    <TextField fx:id="batchField" promptText="e.g. BATCH-00124"/>
+                </children>
+            </VBox>
+            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <children>
+                    <Label text="Quantity"/>
+                    <TextField fx:id="qtyField" promptText="e.g. 100"/>
+                </children>
+            </VBox>
+
+            <!-- Row 2 -->
+            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                <children>
+                    <Label text="Unit Price"/>
+                    <TextField fx:id="priceField" promptText="e.g. 2.50"/>
+                </children>
+            </VBox>
+            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <children>
+                    <Label text="Expiry Date"/>
+                    <DatePicker fx:id="expiryPicker"/>
+                </children>
+            </VBox>
+
+            <!-- Row 3 -->
+            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                <children>
+                    <Label text="Supplier"/>
+                    <TextField fx:id="supplierField" promptText="e.g. Pharma Supply Co."/>
+                </children>
+            </VBox>
+            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                <children>
+                    <Label text="Reorder Level"/>
+                    <TextField fx:id="reorderField" promptText="e.g. 20"/>
+                </children>
+            </VBox>
+
+            <!-- Row 4: Status -->
+            <Label fx:id="statusLabel" text="" style="-fx-text-fill: -color-text-muted;"
+                   GridPane.columnSpan="2" GridPane.rowIndex="4"/>
+
+        </GridPane>
+    </content>
+    <padding>
+        <Insets top="10" right="10" bottom="0" left="10"/>
+    </padding>
+</DialogPane>

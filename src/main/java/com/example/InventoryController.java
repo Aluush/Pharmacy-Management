@@ -13,8 +13,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TextFormatter;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.sql.*;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -57,10 +67,7 @@ public class InventoryController {
 
     @FXML
     private void initialize() {
-        // Categories
-        categoryBox.setItems(FXCollections.observableArrayList(
-            "Analgesics", "Antibiotics", "Vitamins", "Dermatology", "Cardiology", "Antipyretics", "Others"
-        ));
+        // Categories loaded on-demand in the popup dialog
 
         // Table columns
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -73,20 +80,64 @@ public class InventoryController {
         colSupplier.setCellValueFactory(new PropertyValueFactory<>("supplier"));
         colReorder.setCellValueFactory(new PropertyValueFactory<>("reorderLevel"));
 
-        // Sample data
-        masterData.addAll(
-            new InventoryItem(idSequence.getAndIncrement(), "Paracetamol 500mg", "Analgesics", "B-1022", 120, 3.20, "2026-02-01", "HealthCo", 20),
-            new InventoryItem(idSequence.getAndIncrement(), "Amoxicillin 500mg", "Antibiotics", "AMX-221", 80, 6.90, "2026-06-15", "PharmaSupply", 15),
-            new InventoryItem(idSequence.getAndIncrement(), "Vitamin C 1000mg", "Vitamins", "VC-019", 200, 4.50, "2027-01-30", "NutriLabs", 30),
-            new InventoryItem(idSequence.getAndIncrement(), "Ibuprofen 200mg", "Analgesics", "IB-551", 60, 2.80, "2026-09-10", "MediPlus", 10),
-            new InventoryItem(idSequence.getAndIncrement(), "Hydrocortisone Cream 1%", "Dermatology", "DERM-44", 35, 5.75, "2025-12-12", "SkinCare Ltd", 8)
-        );
+        // Load data from database
+        loadInventoryFromDb();
 
         // Filtering + sorting
         filtered = new FilteredList<>(masterData, item -> true);
         sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(table.comparatorProperty());
         table.setItems(sorted);
+
+        // Table UX: placeholder, row highlighting, quantity badge
+        table.setPlaceholder(new Label("No inventory items."));
+        table.setRowFactory(tv -> new TableRow<InventoryItem>() {
+            @Override
+            protected void updateItem(InventoryItem item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("row-warning", "row-danger");
+                if (empty || item == null) return;
+                boolean low = item.getReorderLevel() > 0 && item.getQuantity() <= item.getReorderLevel();
+                boolean expSoon = false;
+                if (item.getExpiry() != null && !item.getExpiry().isBlank()) {
+                    try {
+                        LocalDate exp = LocalDate.parse(item.getExpiry());
+                        long days = ChronoUnit.DAYS.between(LocalDate.now(), exp);
+                        expSoon = days >= 0 && days <= 30;
+                    } catch (Exception ignore) { /* ignore */ }
+                }
+                if (low) {
+                    getStyleClass().add("row-danger");
+                } else if (expSoon) {
+                    getStyleClass().add("row-warning");
+                }
+            }
+        });
+        colQty.setCellFactory(col -> new TableCell<InventoryItem, Integer>() {
+            private final Label badge = new Label();
+            @Override
+            protected void updateItem(Integer val, boolean empty) {
+                super.updateItem(val, empty);
+                if (empty || val == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+                InventoryItem item = getTableView().getItems().get(getIndex());
+                boolean low = item != null && item.getReorderLevel() > 0 && item.getQuantity() <= item.getReorderLevel();
+                badge.setText(val.toString());
+                badge.getStyleClass().clear();
+                badge.getStyleClass().add("badge");
+                if (low) badge.getStyleClass().add("badge-danger");
+                setText(null);
+                setGraphic(badge);
+            }
+        });
+
+        // Numeric input formatters
+        if (qtyField != null) qtyField.setTextFormatter(integerFormatter());
+        if (reorderField != null) reorderField.setTextFormatter(integerFormatter());
+        if (priceField != null) priceField.setTextFormatter(decimalFormatter());
 
         // Filter binding
         filterField.textProperty().addListener((obs, old, val) -> {
@@ -141,30 +192,39 @@ public class InventoryController {
             String expiryStr = expiry != null ? expiry.toString() : "";
 
             InventoryItem selected = table.getSelectionModel().getSelectedItem();
-            if (selected != null && Objects.equals(selected.getName(), name) && Objects.equals(selected.getBatch(), batch)) {
-                // Update existing (simple heuristic)
+            int reorderVal = reorder != null ? reorder : 0;
+            String batchStr = batch != null ? batch : "";
+            String supplierStr = supplier != null ? supplier : "";
+            if (selected != null) {
+                // Update existing using DB
+                updateInventoryItem(selected.getId(), name, category, batchStr, qty, price, expiryStr, supplierStr, reorderVal);
+                selected.setName(name);
+                selected.setBatch(batchStr);
                 selected.setCategory(category);
                 selected.setQuantity(qty);
                 selected.setPrice(price);
                 selected.setExpiry(expiryStr);
-                selected.setSupplier(supplier);
-                selected.setReorderLevel(reorder != null ? reorder : 0);
+                selected.setSupplier(supplierStr);
+                selected.setReorderLevel(reorderVal);
                 table.refresh();
                 setStatus("Item updated.", false);
+                ensureCategoryInBox(category);
             } else {
+                int newId = insertInventoryItem(name, category, batchStr, qty, price, expiryStr, supplierStr, reorderVal);
                 InventoryItem item = new InventoryItem(
-                    idSequence.getAndIncrement(),
+                    newId,
                     name,
                     category,
-                    batch != null ? batch : "",
+                    batchStr,
                     qty,
                     price,
                     expiryStr,
-                    supplier != null ? supplier : "",
-                    reorder != null ? reorder : 0
+                    supplierStr,
+                    reorderVal
                 );
                 masterData.add(item);
                 setStatus("Item saved.", false);
+                ensureCategoryInBox(category);
             }
 
             onReset(); // clear form
@@ -175,29 +235,82 @@ public class InventoryController {
     }
 
     @FXML
+    private void onAddNew() {
+        openItemDialog(null);
+    }
+
+    @FXML
     private void onEdit() {
         InventoryItem sel = table.getSelectionModel().getSelectedItem();
         if (sel == null) {
             setStatus("Select an item to edit.", true);
             return;
         }
-        nameField.setText(sel.getName());
-        categoryBox.setValue(sel.getCategory());
-        batchField.setText(sel.getBatch());
-        qtyField.setText(String.valueOf(sel.getQuantity()));
-        priceField.setText(String.valueOf(sel.getPrice()));
-        supplierField.setText(sel.getSupplier());
-        reorderField.setText(String.valueOf(sel.getReorderLevel()));
-        if (sel.getExpiry() != null && !sel.getExpiry().isBlank()) {
-            try {
-                expiryPicker.setValue(LocalDate.parse(sel.getExpiry()));
-            } catch (Exception ignore) {
-                expiryPicker.setValue(null);
+        openItemDialog(sel);
+    }
+
+    private void openItemDialog(InventoryItem existing) {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("inventory-item-dialog.fxml"));
+            DialogPane pane = loader.load();
+            InventoryItemDialogController dc = loader.getController();
+            dc.setCategories(loadCategoriesFromDb());
+            if (existing != null) {
+                dc.setItem(existing);
+                pane.setHeaderText("Edit Item");
+            } else {
+                pane.setHeaderText("Add Item");
             }
-        } else {
-            expiryPicker.setValue(null);
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(pane);
+            dialog.setTitle(existing != null ? "Edit Item" : "Add Item");
+            if (App.getPrimaryScene() != null && App.getPrimaryScene().getWindow() != null) {
+                dialog.initOwner(App.getPrimaryScene().getWindow());
+            }
+
+            var result = dialog.showAndWait();
+            if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                String name = trimOrNull(dc.getNameValue());
+                String category = dc.getCategoryValue();
+                String batch = trimOrNull(dc.getBatchValue());
+                Integer qty = dc.getQtyValue();
+                Double price = dc.getPriceValue();
+                LocalDate expiry = dc.getExpiryValue();
+                String supplier = trimOrNull(dc.getSupplierValue());
+                Integer reorder = dc.getReorderValue();
+
+                if (name == null || name.isBlank()) { dc.setStatus("Name is required.", true); return; }
+                if (category == null || category.isBlank()) { dc.setStatus("Category is required.", true); return; }
+                if (qty == null || qty < 0) { dc.setStatus("Quantity must be non-negative.", true); return; }
+                if (price == null || price < 0) { dc.setStatus("Price must be non-negative.", true); return; }
+
+                String expiryStr = (expiry != null) ? expiry.toString() : "";
+                int reorderVal = reorder != null ? reorder : 0;
+                String batchStr = batch != null ? batch : "";
+                String supplierStr = supplier != null ? supplier : "";
+
+                if (existing != null) {
+                    updateInventoryItem(existing.getId(), name, category, batchStr, qty, price, expiryStr, supplierStr, reorderVal);
+                    existing.setName(name);
+                    existing.setBatch(batchStr);
+                    existing.setCategory(category);
+                    existing.setQuantity(qty);
+                    existing.setPrice(price);
+                    existing.setExpiry(expiryStr);
+                    existing.setSupplier(supplierStr);
+                    existing.setReorderLevel(reorderVal);
+                    table.refresh();
+                    setStatus("Item updated.", false);
+                } else {
+                    int newId = insertInventoryItem(name, category, batchStr, qty, price, expiryStr, supplierStr, reorderVal);
+                    InventoryItem item = new InventoryItem(newId, name, category, batchStr, qty, price, expiryStr, supplierStr, reorderVal);
+                    masterData.add(0, item);
+                    setStatus("Item saved.", false);
+                }
+            }
+        } catch (Exception ex) {
+            setStatus("Operation failed: " + ex.getMessage(), true);
         }
-        setStatus("Loaded item for editing. Saving will update.", false);
     }
 
     @FXML
@@ -207,6 +320,7 @@ public class InventoryController {
             setStatus("Select an item to delete.", true);
             return;
         }
+        deleteInventoryItem(sel.getId());
         masterData.remove(sel);
         setStatus("Item deleted.", false);
         updateTotals();
@@ -267,6 +381,133 @@ public class InventoryController {
         }
     }
 
+    // Database operations
+    private void loadInventoryFromDb() {
+        masterData.clear();
+        String sql = "SELECT id, name, category, batch, quantity, price, expiry, supplier, reorder_level FROM inventory_items ORDER BY id DESC";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String category = rs.getString("category");
+                String batch = rs.getString("batch");
+                int qty = rs.getInt("quantity");
+                double price = rs.getDouble("price");
+                Date exp = rs.getDate("expiry");
+                String expiry = exp != null ? exp.toString() : "";
+                String supplier = rs.getString("supplier");
+                int reorder = rs.getInt("reorder_level");
+                masterData.add(new InventoryItem(id, name, category, batch != null ? batch : "", qty, price, expiry, supplier != null ? supplier : "", reorder));
+            }
+        } catch (Exception ex) {
+            setStatus("Failed to load inventory: " + ex.getMessage(), true);
+        }
+    }
+
+    private int insertInventoryItem(String name, String category, String batch, int qty, double price, String expiry, String supplier, int reorder) throws SQLException {
+        String sql = "INSERT INTO inventory_items (name, category, batch, quantity, price, expiry, supplier, reorder_level) VALUES (?,?,?,?,?,?,?,?)";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, name);
+            ps.setString(2, category);
+            ps.setString(3, batch);
+            ps.setInt(4, qty);
+            ps.setDouble(5, price);
+            if (expiry != null && !expiry.isBlank()) {
+                ps.setDate(6, Date.valueOf(expiry));
+            } else {
+                ps.setNull(6, Types.DATE);
+            }
+            ps.setString(7, supplier);
+            ps.setInt(8, reorder);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
+        }
+        throw new SQLException("Failed to obtain generated key for inventory item");
+    }
+
+    private void updateInventoryItem(int id, String name, String category, String batch, int qty, double price, String expiry, String supplier, int reorder) throws SQLException {
+        String sql = "UPDATE inventory_items SET name=?, category=?, batch=?, quantity=?, price=?, expiry=?, supplier=?, reorder_level=? WHERE id=?";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setString(2, category);
+            ps.setString(3, batch);
+            ps.setInt(4, qty);
+            ps.setDouble(5, price);
+            if (expiry != null && !expiry.isBlank()) {
+                ps.setDate(6, Date.valueOf(expiry));
+            } else {
+                ps.setNull(6, Types.DATE);
+            }
+            ps.setString(7, supplier);
+            ps.setInt(8, reorder);
+            ps.setInt(9, id);
+            ps.executeUpdate();
+        }
+    }
+
+    private void deleteInventoryItem(int id) {
+        String sql = "DELETE FROM inventory_items WHERE id=?";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (Exception ex) {
+            setStatus("Delete failed: " + ex.getMessage(), true);
+        }
+    }
+
+    // Categories from DB
+    private ObservableList<String> loadCategoriesFromDb() {
+        ObservableList<String> items = FXCollections.observableArrayList();
+        String sql = "SELECT DISTINCT COALESCE(category,'Uncategorized') AS cat " +
+                     "FROM inventory_items ORDER BY cat";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                items.add(rs.getString("cat"));
+            }
+        } catch (Exception ex) {
+            // fallback to empty list if failure
+        }
+        return items;
+    }
+
+    private void ensureCategoryInBox(String category) {
+        if (category == null || category.isBlank() || categoryBox == null) return;
+        if (!categoryBox.getItems().contains(category)) {
+            categoryBox.getItems().add(category);
+        }
+    }
+
+    // Text formatters
+    private static TextFormatter<String> integerFormatter() {
+        return new TextFormatter<>(change ->
+            change.getControlNewText().matches("\\d*") ? change : null
+        );
+    }
+    private static TextFormatter<String> decimalFormatter() {
+        return new TextFormatter<>(change ->
+            change.getControlNewText().matches("\\d*(\\.?\\d{0,2})?") ? change : null
+        );
+    }
+
+    // Focus helpers for global search routing
+    public void focusFilterWith(String q) {
+        if (filterField == null) return;
+        if (q != null) {
+            filterField.setText(q);
+        }
+        filterField.requestFocus();
+        filterField.positionCaret(filterField.getText() != null ? filterField.getText().length() : 0);
+    }
+
     // Data model
     public static class InventoryItem {
         private int id;
@@ -308,6 +549,8 @@ public class InventoryController {
         public void setExpiry(String expiry) { this.expiry = expiry; }
         public void setSupplier(String supplier) { this.supplier = supplier; }
         public void setReorderLevel(int reorderLevel) { this.reorderLevel = reorderLevel; }
+        public void setName(String name) { this.name = name; }
+        public void setBatch(String batch) { this.batch = batch; }
 
         public String getPriceFmt() {
             return String.format("$%.2f", price);

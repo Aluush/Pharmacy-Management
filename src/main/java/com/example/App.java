@@ -13,6 +13,10 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1200, 800);
         scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+        // Ensure root class for looked-up colors used by sidebar/theme
+        if (!scene.getRoot().getStyleClass().contains("root")) {
+            scene.getRoot().getStyleClass().add("root");
+        }
         primaryScene = scene;
         try {
             Database.bootstrap();

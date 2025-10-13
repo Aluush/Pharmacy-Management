@@ -13,6 +13,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class DashboardController {
 
     // KPIs
@@ -36,43 +43,51 @@ public class DashboardController {
 
     @FXML
     private void initialize() {
-        // Metrics (sample data)
-        metricSalesToday.setText("$2,340.50");
-        metricSalesDelta.setText("+8.4% from yesterday");
-        metricInStock.setText("12,384");
-        metricLowStock.setText("27");
-        metricExpiring.setText("14");
-
+        loadMetrics();
         setupCharts();
         setupTable();
     }
 
     private void setupCharts() {
-        // Line chart - weekly sales (sample)
-        if (salesLineChart.getXAxis() instanceof CategoryAxis) {
-            // ok
+        // Weekly sales from DB (last 7 days)
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(6);
+        Map<LocalDate, Double> totals = new HashMap<>();
+        DateTimeFormatter dayFmt = DateTimeFormatter.ofPattern("EEE", Locale.US);
+        for (int i = 0; i < 7; i++) {
+            totals.put(start.plusDays(i), 0.0);
         }
-        if (salesLineChart.getYAxis() instanceof NumberAxis) {
-            // ok
-        }
+        String sql = "SELECT DATE(sale_date) d, SUM(grand_total) t FROM sales " +
+                     "WHERE sale_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                     "GROUP BY DATE(sale_date)";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                LocalDate d = rs.getDate("d").toLocalDate();
+                double t = rs.getDouble("t");
+                if (totals.containsKey(d)) totals.put(d, t);
+            }
+        } catch (Exception ignore) {}
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.getData().add(new XYChart.Data<>("Mon", 280));
-        series.getData().add(new XYChart.Data<>("Tue", 320));
-        series.getData().add(new XYChart.Data<>("Wed", 450));
-        series.getData().add(new XYChart.Data<>("Thu", 380));
-        series.getData().add(new XYChart.Data<>("Fri", 520));
-        series.getData().add(new XYChart.Data<>("Sat", 610));
-        series.getData().add(new XYChart.Data<>("Sun", 420));
+        for (int i = 0; i < 7; i++) {
+            LocalDate d = start.plusDays(i);
+            series.getData().add(new XYChart.Data<>(d.format(dayFmt), totals.getOrDefault(d, 0.0)));
+        }
         salesLineChart.getData().setAll(series);
 
-        // Pie chart - stock by category (sample)
-        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList(
-            new PieChart.Data("Analgesics", 35),
-            new PieChart.Data("Antibiotics", 22),
-            new PieChart.Data("Vitamins", 18),
-            new PieChart.Data("Dermatology", 12),
-            new PieChart.Data("Other", 13)
-        );
+        // Stock by category from DB
+        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
+        String sqlPie = "SELECT COALESCE(category,'Uncategorized') AS cat, SUM(quantity) AS qty FROM inventory_items GROUP BY COALESCE(category,'Uncategorized')";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sqlPie);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String cat = rs.getString("cat");
+                int qty = rs.getInt("qty");
+                if (qty > 0) pieData.add(new PieChart.Data(cat, qty));
+            }
+        } catch (Exception ignore) {}
         stockPieChart.setData(pieData);
     }
 
@@ -87,13 +102,25 @@ public class DashboardController {
     }
 
     private ObservableList<SalesRow> sampleSales() {
-        return FXCollections.observableArrayList(
-            new SalesRow("#10021", "Paracetamol 500mg", 2, "$6.00", "2025-10-12 10:23"),
-            new SalesRow("#10022", "Vitamin C 1000mg", 1, "$9.50", "2025-10-12 11:05"),
-            new SalesRow("#10023", "Amoxicillin 500mg", 1, "$12.20", "2025-10-12 11:17"),
-            new SalesRow("#10024", "Ibuprofen 200mg", 3, "$7.80", "2025-10-12 12:02"),
-            new SalesRow("#10025", "Cough Syrup 100ml", 1, "$4.90", "2025-10-12 12:40")
-        );
+        ObservableList<SalesRow> rows = FXCollections.observableArrayList();
+        String sql = "SELECT s.id AS sale_id, si.item_name, si.qty, si.line_total, s.sale_date " +
+                     "FROM sale_items si JOIN sales s ON si.sale_id = s.id " +
+                     "ORDER BY s.sale_date DESC, si.id DESC LIMIT 10";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            while (rs.next()) {
+                String saleId = "#" + rs.getInt("sale_id");
+                String item = rs.getString("item_name");
+                int qty = rs.getInt("qty");
+                String total = String.format(Locale.US, "$%.2f", rs.getDouble("line_total"));
+                Timestamp ts = rs.getTimestamp("sale_date");
+                String date = ts != null ? ts.toLocalDateTime().format(fmt) : "";
+                rows.add(new SalesRow(saleId, item, qty, total, date));
+            }
+        } catch (Exception ignore) {}
+        return rows;
     }
 
     public static class SalesRow {
@@ -120,8 +147,49 @@ public class DashboardController {
 
     @FXML
     private void onRefresh() {
-        // In a real app, reload from services/DB. For now, just update with minor changes.
+        loadMetrics();
         setupCharts();
         recentSalesTable.setItems(sampleSales());
+    }
+    private void loadMetrics() {
+        // Today's sales and delta vs yesterday
+        double today = 0.0;
+        double yesterday = 0.0;
+        try (Connection c = Database.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT COALESCE(SUM(grand_total),0) FROM sales WHERE DATE(sale_date)=CURDATE()");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) today = rs.getDouble(1);
+            }
+            try (PreparedStatement ps = c.prepareStatement("SELECT COALESCE(SUM(grand_total),0) FROM sales WHERE DATE(sale_date)=DATE_SUB(CURDATE(), INTERVAL 1 DAY)");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) yesterday = rs.getDouble(1);
+            }
+        } catch (Exception ignore) {}
+        metricSalesToday.setText(String.format(Locale.US, "$%.2f", today));
+        double deltaPct = (yesterday <= 0.0) ? (today > 0 ? 100.0 : 0.0) : ((today - yesterday) / yesterday) * 100.0;
+        String arrow = deltaPct >= 0 ? "+" : "";
+        metricSalesDelta.setText(String.format(Locale.US, "%s%.1f%% from yesterday", arrow, deltaPct));
+
+        // Inventory KPIs
+        int inStock = 0;
+        int lowStock = 0;
+        int expiring = 0;
+        try (Connection c = Database.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT COALESCE(SUM(quantity),0) FROM inventory_items");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) inStock = rs.getInt(1);
+            }
+            try (PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM inventory_items WHERE reorder_level > 0 AND quantity <= reorder_level");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) lowStock = rs.getInt(1);
+            }
+            try (PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM inventory_items WHERE expiry IS NOT NULL AND expiry BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)");
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) expiring = rs.getInt(1);
+            }
+        } catch (Exception ignore) {}
+        metricInStock.setText(String.format(Locale.US, "%,d", inStock));
+        metricLowStock.setText(String.format(Locale.US, "%,d", lowStock));
+        metricExpiring.setText(String.format(Locale.US, "%,d", expiring));
     }
 }

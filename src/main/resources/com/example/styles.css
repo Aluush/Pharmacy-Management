@@ -54,6 +54,9 @@
     -fx-padding: 16;
     -fx-spacing: 8;
     -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 20, 0.1, 0, 6);
+    -fx-background-insets: 0;
+    -fx-border-color: transparent -color-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
 }
 
 .sidebar-title {
@@ -218,4 +221,430 @@
     -fx-padding: 2 8 2 8;
     -fx-font-weight: 700;
     -fx-font-size: 11px;
+}
+
+/* Status bar */
+.statusbar {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+
+.status-ok, .status-bad {
+    -fx-background-radius: 999px;
+    -fx-padding: 2 8 2 8;
+    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+}
+
+.status-ok {
+    -fx-background-color: rgba(34,197,94,0.20);
+    -fx-text-fill: #065f46;
+    -fx-border-color: rgba(16,185,129,0.45);
+    -fx-border-width: 1;
+}
+
+.status-bad {
+    -fx-background-color: rgba(239,68,68,0.18);
+    -fx-text-fill: #7f1d1d;
+    -fx-border-color: rgba(239,68,68,0.45);
+    -fx-border-width: 1;
+}
+
+/* MenuButton - ghost style */
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-background-radius: 8px;
+    -fx-padding: 6 10 6 10;
+    -fx-font-weight: 600;
+}
+
+.menu-button:hover {
+    -fx-background-color: -color-surface-2;
+}
+
+/* Topbar search field */
+.topbar .text-field {
+    -fx-background-color: -color-surface-2;
+}
+.topbar .text-field:focused {
+    -fx-background-color: -color-surface;
+}
+
+/* Table enhancements */
+.table-view .column-header .label {
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-text-muted;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.06);
+}
+
+/* Cards hover subtle */
+.card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.22), 24, 0.12, 0, 8);
+}
+
+/* Inventory table row status */
+.table-row-cell.row-warning {
+    -fx-background-color: rgba(250, 204, 21, 0.10); /* amber-400 @10% */
+}
+.table-row-cell.row-danger {
+    -fx-background-color: rgba(248, 113, 113, 0.12); /* red-400 @12% */
+}
+
+/* Badge variants */
+.badge-danger {
+    -fx-background-color: rgba(248, 113, 113, 0.28);
+    -fx-text-fill: #7f1d1d;
+    -fx-border-color: rgba(248, 113, 113, 0.45);
+    -fx-border-width: 1;
+}
+
+/* Top sub-navigation (replaces sidebar) */
+.subnav {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+
+.subnav .toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-padding: 8 12 8 12;
+    -fx-background-radius: 8px;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+}
+
+.subnav .toggle-button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.06);
+}
+
+.subnav .toggle-button:selected {
+    -fx-background-color: rgba(37, 99, 235, 0.12);
+    -fx-border-color: rgba(37, 99, 235, 0.25);
+    -fx-text-fill: -color-primary;
+}
+
+/* Expert sidebar */
+.sidebar.pro {
+    -fx-background-color: -color-surface;
+    -fx-padding: 16;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 20, 0.1, 0, 6);
+    -fx-background-insets: 0;
+    -fx-border-color: transparent -color-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar.pro .user-card {
+    -fx-background-color: -color-surface-2;
+    -fx-background-radius: 10px;
+    -fx-padding: 12;
+    -fx-alignment: CENTER;
+    -fx-spacing: 6;
+}
+
+.sidebar.pro .avatar {
+    -fx-font-size: 28px;
+}
+
+.sidebar.pro .user-name {
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-text;
+}
+
+.sidebar.pro .user-role {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+}
+
+.sidebar.pro .nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 10;
+    -fx-background-radius: 8px;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-graphic-text-gap: 10;
+    -fx-min-height: 40;
+    -fx-pref-height: 44;
+}
+
+.sidebar.pro .nav-button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.06);
+}
+
+.sidebar.pro .nav-button:selected {
+    -fx-background-color: rgba(37, 99, 235, 0.12);
+    -fx-border-color: rgba(37, 99, 235, 0.25);
+    -fx-text-fill: -color-primary;
+}
+
+.sidebar.pro.collapsed .user-card,
+.sidebar.pro.collapsed .sidebar-title,
+.sidebar.pro.collapsed .sidebar-footer {
+    -fx-padding: 0;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-opacity: 0;
+    -fx-visibility: hidden;
+}
+
+.sidebar.pro.collapsed .nav-button {
+    -fx-alignment: CENTER;
+    -fx-padding: 10;
+    -fx-graphic-text-gap: 0;
+}
+
+/* Stylish upgrades for the Expert Sidebar */
+
+/* Soft gradient + rounded shell */
+.sidebar.pro {
+    -fx-background-radius: 16px;
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, -3%),
+        derive(-color-surface, -6%)
+    );
+}
+.dark .sidebar.pro {
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, 4%),
+        derive(-color-surface, 2%)
+    );
+}
+
+/* User card polish */
+.sidebar.pro .user-card {
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface-2,
+        derive(-color-surface-2, -2%)
+    );
+    -fx-border-color: rgba(0,0,0,0.04);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.10), 12, 0.12, 0, 2);
+}
+
+/* Title divider */
+.sidebar.pro .sidebar-title {
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 8 10 8;
+}
+
+/* Nav button accent stripe and glow */
+.sidebar.pro .nav-button {
+    -fx-cursor: hand;
+}
+.sidebar.pro .nav-button:hover {
+    -fx-border-color: transparent transparent transparent -color-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-background-color: linear-gradient(to right,
+        rgba(37, 99, 235, 0.06),
+        rgba(37, 99, 235, 0.02)
+    );
+}
+.sidebar.pro .nav-button:selected {
+    -fx-border-color: transparent transparent transparent -color-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-background-color: linear-gradient(to right,
+        rgba(37, 99, 235, 0.14),
+        rgba(37, 99, 235, 0.06)
+    );
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.25), 12, 0.3, 0, 2);
+}
+
+/* Icon emphasis and micro-interactions */
+.sidebar.pro .nav-button .label {
+    -fx-opacity: 0.85;
+}
+.sidebar.pro .nav-button:hover .label {
+    -fx-opacity: 1.0;
+    -fx-scale-x: 1.06;
+    -fx-scale-y: 1.06;
+}
+.sidebar.pro .nav-button:selected .label {
+    -fx-opacity: 1.0;
+}
+
+/* Compact (collapsed) refinements */
+.sidebar.pro.collapsed {
+    -fx-padding: 16 8 16 8;
+    -fx-background-radius: 16px;
+}
+.sidebar.pro.collapsed .nav-button {
+    -fx-padding: 10 8 10 8;
+}
+
+/* Strong ID selector to ensure sidebar styling always applies */
+#sidebar {
+    -fx-pref-width: 240;
+    -fx-background-insets: 0;
+    -fx-background-radius: 16px;
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, -3%),
+        derive(-color-surface, -6%)
+    );
+    -fx-border-color: transparent -color-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 20, 0.1, 0, 6);
+}
+
+.dark #sidebar {
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, 4%),
+        derive(-color-surface, 2%)
+    );
+}
+
+#sidebar .nav-button {
+    -fx-min-height: 40;
+    -fx-pref-height: 44;
+    -fx-graphic-text-gap: 10;
+    -fx-text-fill: -color-text;
+}
+#sidebar .nav-button:hover {
+    -fx-background-color: rgba(37, 99, 235, 0.06);
+}
+#sidebar .nav-button:selected {
+    -fx-background-color: rgba(37, 99, 235, 0.12);
+    -fx-border-color: rgba(37, 99, 235, 0.25);
+    -fx-border-width: 1;
+    -fx-text-fill: -color-primary;
+}
+
+/* Web-grade sidebar polish */
+
+/* Scroll container for sidebar */
+.sidebar-scroll {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+.sidebar-scroll .viewport {
+    -fx-background-color: transparent;
+}
+.sidebar-scroll .corner {
+    -fx-background-color: transparent;
+}
+
+/* Custom vertical scrollbar (subtle, web-like) */
+.sidebar-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 8 2 8 2;
+}
+.sidebar-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+}
+.sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(100,116,139,0.25); /* slate-500 @25% */
+    -fx-background-insets: 0;
+    -fx-background-radius: 999;
+}
+.dark .sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(148,163,184,0.35); /* slate-400 @35% */
+}
+.sidebar-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(100,116,139,0.38);
+}
+
+/* Brand header */
+.sidebar.pro .brand {
+    -fx-padding: 4 8 10 8;
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.sidebar.pro .brand .logo {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: white;
+    -fx-background-radius: 999;
+    -fx-padding: 4 8 4 8;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.25), 10, 0.3, 0, 2);
+}
+.sidebar.pro .brand .name {
+    -fx-font-weight: 900;
+    -fx-text-fill: -color-text;
+    -fx-font-size: 14px;
+}
+
+/* Section spacing refinements */
+.sidebar.pro .sidebar-title {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 12 8 8 8;
+    -fx-letter-spacing: 0.5px; /* ignored by JavaFX, left for readability */
+}
+
+/* Nav button refined states (web-like) */
+.sidebar.pro .nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 10;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-graphic-text-gap: 10;
+    -fx-min-height: 42;
+    -fx-pref-height: 46;
+}
+.sidebar.pro .nav-button:hover {
+    -fx-background-color: linear-gradient(to right,
+        rgba(37, 99, 235, 0.08),
+        rgba(37, 99, 235, 0.04)
+    );
+}
+.sidebar.pro .nav-button:selected {
+    -fx-background-color: linear-gradient(to right,
+        rgba(37, 99, 235, 0.18),
+        rgba(37, 99, 235, 0.08)
+    );
+    -fx-border-color: transparent transparent transparent -color-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: -color-primary;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.25), 12, 0.3, 0, 2);
+}
+
+/* Compact collapsed tweaks remain compatible with ScrollPane wrapper */
+.sidebar.pro.collapsed {
+    -fx-padding: 16 8 16 8;
+}
+.sidebar.pro.collapsed .brand .name,
+.sidebar.pro.collapsed .user-card,
+.sidebar.pro.collapsed .sidebar-title {
+    -fx-padding: 0;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-opacity: 0;
+    -fx-visibility: hidden;
+}
+.sidebar.pro.collapsed .nav-button {
+    -fx-padding: 10;
+    -fx-graphic-text-gap: 0;
+    -fx-alignment: CENTER;
 }
