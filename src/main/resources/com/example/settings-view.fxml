@@ -91,6 +91,106 @@
                 </children>
             </VBox>
 
+            <!-- Configuration -->
+            <VBox spacing="12" styleClass="card">
+                <children>
+                    <Label text="Configuration" styleClass="section-title"/>
+                    <GridPane hgap="16" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Profile -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <children>
+                                <Label text="Profile (base/dev/test/prod)"/>
+                                <ComboBox fx:id="profileBox" promptText="base (no profile)"/>
+                            </children>
+                        </VBox>
+                        <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <children>
+                                <Button text="Switch Profile" onAction="#onSwitchProfile"/>
+                                <Button text="Reload Config" onAction="#onReloadConfig" styleClass="ghost-button"/>
+                            </children>
+                        </HBox>
+
+                        <!-- App title -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <children>
+                                <Label text="Application Title"/>
+                                <TextField fx:id="appTitleField" promptText="PharmaPro - Pharmacy Management"/>
+                            </children>
+                        </VBox>
+
+                        <!-- DB type + host -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <children>
+                                <Label text="Database Type"/>
+                                <ComboBox fx:id="dbTypeBox" promptText="mysql | postgres | sqlite"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <children>
+                                <Label text="DB Host"/>
+                                <TextField fx:id="dbHostField" promptText="localhost"/>
+                            </children>
+                        </VBox>
+
+                        <!-- Port + name -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                            <children>
+                                <Label text="DB Port"/>
+                                <TextField fx:id="dbPortField" promptText="3306"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <children>
+                                <Label text="DB Name"/>
+                                <TextField fx:id="dbNameField" promptText="pharmapro"/>
+                            </children>
+                        </VBox>
+
+                        <!-- User + pass -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                            <children>
+                                <Label text="DB User"/>
+                                <TextField fx:id="dbUserField" promptText="root"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                            <children>
+                                <Label text="DB Password"/>
+                                <PasswordField fx:id="dbPassField" promptText=""/>
+                            </children>
+                        </VBox>
+
+                        <!-- Params + URL -->
+                        <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="5">
+                            <children>
+                                <Label text="JDBC Params"/>
+                                <TextField fx:id="dbParamsField" promptText="useSSL=false&#38;serverTimezone=UTC"/>
+                            </children>
+                        </VBox>
+                        <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                            <children>
+                                <Label text="Explicit JDBC URL (optional override)"/>
+                                <TextField fx:id="dbUrlField" promptText="jdbc:mysql://localhost:3306/pharmapro?useSSL=false&#38;serverTimezone=UTC"/>
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="8" alignment="CENTER_RIGHT" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                            <children>
+                                <Button text="Load" onAction="#onLoadConfig" styleClass="ghost-button"/>
+                                <Button text="Save" onAction="#onSaveConfig"/>
+                                <Button text="Test DB" onAction="#onTestDb" styleClass="ghost-button"/>
+                            </children>
+                        </HBox>
+                    </GridPane>
+                    <Label fx:id="configStatus" text="" style="-fx-text-fill: -color-text-muted;"/>
+                </children>
+            </VBox>
+
             <!-- Backup / Restore -->
             <VBox spacing="12" styleClass="card">
                 <children>

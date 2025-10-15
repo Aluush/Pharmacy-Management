@@ -81,6 +81,28 @@
                 </children>
             </HBox>
 
+            <!-- 3D Showcase -->
+            <VBox spacing="8" styleClass="card">
+                <children>
+                    <Label text="3D Showcase" styleClass="section-title"/>
+                    <StackPane fx:id="threeDPane" prefHeight="260"/>
+                </children>
+            </VBox>
+
+            <!-- Top Sellers -->
+            <VBox spacing="8" styleClass="card">
+                <children>
+                    <Label text="Top Selling Medicines" styleClass="section-title"/>
+                    <TableView fx:id="topItemsTable" prefHeight="260">
+                        <columns>
+                            <TableColumn fx:id="colTopItemName" text="Medicine" prefWidth="240"/>
+                            <TableColumn fx:id="colTopItemQty" text="Qty Sold" prefWidth="120"/>
+                            <TableColumn fx:id="colTopItemRevenue" text="Revenue" prefWidth="140"/>
+                        </columns>
+                    </TableView>
+                </children>
+            </VBox>
+
             <!-- Recent Sales Table -->
             <VBox spacing="8" styleClass="card">
                 <children>

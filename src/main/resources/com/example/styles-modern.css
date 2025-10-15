@@ -1,0 +1,372 @@
+/* PharmaPro Modern v2 Theme – Opinionated professional look */
+
+/* Light palette */
+.root {
+    -color-bg: linear-gradient(to bottom right, #f8fafc, #eef2f7);
+    -color-surface: #ffffff;
+    -color-surface-2: #f3f6fb;
+    -color-primary: #6366f1;          /* indigo-500 */
+    -color-primary-600: #4f46e5;      /* indigo-600 */
+    -color-accent: #22c55e;           /* green-500 */
+    -color-text: #111827;             /* gray-900 */
+    -color-text-muted: #6b7280;       /* gray-500 */
+    -color-border: #e5e7eb;           /* gray-200 */
+
+    -radius: 14;
+    -radius-sm: 10;
+    -shadow-sm: dropshadow(gaussian, rgba(2, 6, 23, 0.10), 16, 0.15, 0, 3);
+    -shadow-md: dropshadow(gaussian, rgba(2, 6, 23, 0.14), 24, 0.22, 0, 6);
+    -shadow-lg: dropshadow(gaussian, rgba(2, 6, 23, 0.16), 36, 0.30, 0, 10);
+
+    -fx-font-family: "Inter", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -fx-background-color: -color-bg;
+    -fx-text-fill: -color-text;
+}
+
+/* Dark overrides */
+.dark {
+    -color-bg: linear-gradient(to bottom right, #0b1220, #0f172a);
+    -color-surface: #0f172a;
+    -color-surface-2: #111827;
+    -color-primary: #818cf8;          /* indigo-400 */
+    -color-primary-600: #6366f1;      /* indigo-500 */
+    -color-accent: #22d3ee;           /* cyan-400 */
+    -color-text: #e5e7eb;
+    -color-text-muted: #9ca3af;
+    -color-border: #1f2937;
+}
+
+/* Topbar – frosted micro-gradient */
+.topbar {
+    -fx-background-color: linear-gradient(to right, rgba(255,255,255,0.85), rgba(255,255,255,0.75));
+    -fx-background-radius: 0 0 16 16;
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.18), 22, 0.24, 0, 6);
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 18;
+    -fx-min-height: 68;
+    -fx-padding: 16 20 16 20;
+    -fx-border-color: transparent transparent rgba(99,102,241,0.15) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.dark .topbar {
+    -fx-background-color: linear-gradient(to right, rgba(17,24,39,0.85), rgba(17,24,39,0.75));
+    -fx-border-color: transparent transparent rgba(129,140,248,0.25) transparent;
+}
+
+/* Larger controls inside topbar */
+.topbar .button,
+.topbar .menu-button,
+.topbar .ghost-button,
+.topbar .toggle-button {
+    -fx-padding: 10 16 10 16;
+    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+    -fx-min-height: 40;
+}
+
+.topbar .menu-button .label,
+.topbar .button .label,
+.topbar .toggle-button .label {
+    -fx-font-size: 13px;
+}
+
+/* Slightly larger search text */
+.topbar .text-field {
+    -fx-font-size: 13px;
+}
+
+.app-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-text-fill: -color-text;
+}
+
+/* Search field inside topbar */
+.topbar .text-field {
+    -fx-background-color: rgba(99,102,241,0.10);
+    -fx-background-radius: 999;
+    -fx-padding: 8 14 8 14;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text;
+}
+.topbar .text-field:focused {
+    -fx-background-color: rgba(99,102,241,0.14);
+    -fx-effect: -shadow-sm;
+}
+
+/* Primary/ghost buttons */
+.button {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-weight: 800;
+    -fx-padding: 9 16 9 16;
+    -fx-effect: -shadow-sm;
+}
+.button:hover {
+    -fx-background-color: -color-primary-600;
+    -fx-effect: -shadow-md;
+}
+.ghost-button,
+.menu-button {
+    -fx-background-color: rgba(99,102,241,0.06);
+    -fx-text-fill: -color-text;
+    -fx-border-color: rgba(99,102,241,0.22);
+    -fx-border-width: 1;
+    -fx-background-radius: 12;
+    -fx-padding: 8 14 8 14;
+    -fx-font-weight: 700;
+}
+.ghost-button:hover,
+.menu-button:hover {
+    -fx-background-color: rgba(99,102,241,0.12);
+}
+
+/* Sidebar – compact, elegant */
+#sidebar {
+    -fx-pref-width: 248;
+    -fx-background-insets: 0;
+    -fx-background-radius: 16;
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, -3%),
+        derive(-color-surface, -6%)
+    );
+    -fx-border-color: transparent -color-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 16;
+    -fx-effect: -shadow-md;
+}
+.dark #sidebar {
+    -fx-background-color: linear-gradient(to bottom,
+        -color-surface,
+        derive(-color-surface, 4%),
+        derive(-color-surface, 2%)
+    );
+}
+
+#sidebar .brand .logo {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: white;
+    -fx-background-radius: 999;
+    -fx-padding: 4 8 4 8;
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.35), 12, 0.4, 0, 2);
+}
+
+#sidebar .nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 12;
+    -fx-font-weight: 700;
+    -fx-border-color: transparent;
+    -fx-graphic-text-gap: 10;
+    -fx-min-height: 44;
+}
+#sidebar .nav-button:hover {
+    -fx-background-color: linear-gradient(to right,
+        rgba(99,102,241,0.10),
+        rgba(99,102,241,0.04)
+    );
+}
+#sidebar .nav-button:selected {
+    -fx-background-color: linear-gradient(to right,
+        rgba(99,102,241,0.22),
+        rgba(99,102,241,0.10)
+    );
+    -fx-text-fill: -color-primary;
+    -fx-border-color: transparent transparent transparent -color-primary;
+    -fx-border-width: 0 0 0 3;
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.32), 12, 0.35, 0, 2);
+}
+
+.sidebar-title {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 10 8 8 8;
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.sidebar-footer {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+}
+
+/* Content area and Cards */
+.content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 24;
+}
+.card {
+    -fx-background-color: -color-surface;
+    -fx-background-radius: 14;
+    -fx-padding: 18;
+    -fx-effect: -shadow-md;
+}
+.card:hover {
+    -fx-effect: -shadow-lg;
+}
+
+.metric-title {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-transform: uppercase;
+}
+.metric-value {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+}
+
+/* Inputs */
+.text-field, .password-field, .combo-box-base, .date-picker {
+    -fx-background-color: -color-surface;
+    -fx-text-fill: -color-text;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-padding: 8 12 8 12;
+}
+.text-field:focused, .password-field:focused, .combo-box-base:focused, .date-picker:focused {
+    -fx-border-color: -color-primary;
+    -fx-effect: -shadow-sm;
+}
+
+/* Table */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-background-radius: 14;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 14;
+}
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, -color-surface-2, derive(-color-surface-2, -2%));
+    -fx-background-radius: 14 14 0 0;
+    -fx-border-color: -color-border;
+}
+.table-view .column-header .label {
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-text-muted;
+}
+.table-row-cell {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-cell-size: 44px;
+}
+.table-row-cell:odd {
+    -fx-background-color: derive(-color-surface, -2%);
+}
+.table-row-cell:hover {
+    -fx-background-color: rgba(99,102,241,0.08);
+}
+.table-row-cell:selected {
+    -fx-background-color: rgba(99,102,241,0.16);
+    -fx-text-fill: -color-text;
+}
+
+/* Inventory row alerts */
+.table-row-cell.row-warning {
+    -fx-background-color: rgba(250, 204, 21, 0.12);
+}
+.table-row-cell.row-danger {
+    -fx-background-color: rgba(239, 68, 68, 0.14);
+}
+
+/* Status badges */
+.badge {
+    -fx-background-color: -color-accent;
+    -fx-text-fill: #052e2b;
+    -fx-background-radius: 999;
+    -fx-padding: 2 10 2 10;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+}
+.statusbar {
+    -fx-background-color: linear-gradient(to top, -color-surface, derive(-color-surface,-2%));
+    -fx-border-color: -color-border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 12;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+.status-ok, .status-bad {
+    -fx-background-radius: 999;
+    -fx-padding: 2 10 2 10;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+}
+.status-ok {
+    -fx-background-color: rgba(34,197,94,0.22);
+    -fx-text-fill: #064e3b;
+    -fx-border-color: rgba(16,185,129,0.45);
+    -fx-border-width: 1;
+}
+.status-bad {
+    -fx-background-color: rgba(239,68,68,0.18);
+    -fx-text-fill: #7f1d1d;
+    -fx-border-color: rgba(239,68,68,0.45);
+    -fx-border-width: 1;
+}
+
+/* Login card tweaks */
+.login .card, .auth .card {
+    -fx-background-color: linear-gradient(to bottom, -color-surface, derive(-color-surface,-2%));
+    -fx-background-radius: 18;
+    -fx-padding: 22;
+    -fx-effect: -shadow-lg;
+}
+
+/* Subnav (if used) */
+.subnav {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+}
+.subnav .toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-padding: 8 12 8 12;
+    -fx-background-radius: 10;
+    -fx-font-weight: 700;
+    -fx-border-color: transparent;
+}
+.subnav .toggle-button:hover {
+    -fx-background-color: rgba(99,102,241,0.08);
+}
+.subnav .toggle-button:selected {
+    -fx-background-color: rgba(99,102,241,0.18);
+    -fx-text-fill: -color-primary;
+    -fx-border-color: rgba(99,102,241,0.30);
+    -fx-border-width: 1;
+}
+
+/* Scroll pane polish */
+.sidebar-scroll, .sidebar-scroll .viewport, .sidebar-scroll .corner {
+    -fx-background-color: transparent;
+}
+.sidebar-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 8 2 8 2;
+}
+.sidebar-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+.sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(100,116,139,0.28);
+    -fx-background-insets: 0;
+    -fx-background-radius: 999;
+}
+.dark .sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(148,163,184,0.35);
+}
+.sidebar-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(100,116,139,0.40);
+}

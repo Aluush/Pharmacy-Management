@@ -3,6 +3,7 @@
 <?import javafx.geometry.Pos?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.Canvas?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.MainController"
@@ -19,7 +20,7 @@
                         <Region HBox.hgrow="ALWAYS"/>
                         <TextField fx:id="searchField" promptText="Search drugs, invoices, suppliers..." maxWidth="360"/>
                         <ToggleButton fx:id="themeToggle" text="Dark" onAction="#onToggleTheme" styleClass="ghost-button"/>
-                        <Button text="Notifications" styleClass="ghost-button"/>
+                        <Button fx:id="notificationsButton" text="Notifications" styleClass="ghost-button"/>
                         <MenuButton text="User" styleClass="menu-button">
                             <items>
                                 <MenuItem text="Profile" onAction="#onProfile"/>
@@ -89,9 +90,14 @@
 
     <!-- Main Content -->
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area">
+        <StackPane>
             <children>
-                <Label text="Loading..." />
+                <Canvas fx:id="bgCanvas" mouseTransparent="true"/>
+                <StackPane fx:id="contentArea" styleClass="content-area">
+                    <children>
+                        <Label text="Loading..." />
+                    </children>
+                </StackPane>
             </children>
         </StackPane>
     </center>

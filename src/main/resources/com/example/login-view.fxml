@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.LoginController"
+            prefWidth="420" prefHeight="520" styleClass="root auth">
+    <center>
+        <VBox alignment="CENTER" spacing="14">
+            <children>
+                <VBox spacing="8" maxWidth="320" styleClass="card">
+                    <children>
+                        <Label text="PharmaPro" style="-fx-font-size: 20px; -fx-font-weight: 900;"/>
+                        <Label text="Sign in to your account" styleClass="sidebar-footer"/>
+
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Username" styleClass="sidebar-title"/>
+                                <TextField fx:id="usernameField" promptText="admin" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Password" styleClass="sidebar-title"/>
+                                <PasswordField fx:id="passwordField" promptText="••••••••" />
+                            </children>
+                        </VBox>
+
+                        <Button text="Sign In" onAction="#onLogin" defaultButton="true" />
+                        <Label fx:id="statusLabel" text="" styleClass="error-text" />
+                    </children>
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24"/>
+    </padding>
+</BorderPane>

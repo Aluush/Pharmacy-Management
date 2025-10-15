@@ -42,6 +42,17 @@
                             </columns>
                         </TableView>
 
+                        <Label text="Batches for selected item" styleClass="section-title"/>
+                        <TableView fx:id="batchTable" prefHeight="240">
+                            <columns>
+                                <TableColumn fx:id="colBatchNo" text="Batch" prefWidth="140"/>
+                                <TableColumn fx:id="colBatchExpiry" text="Expiry" prefWidth="140"/>
+                                <TableColumn fx:id="colBatchQty" text="Qty On Hand" prefWidth="120"/>
+                                <TableColumn fx:id="colBatchSellPrice" text="Sell Price" prefWidth="120"/>
+                                <TableColumn fx:id="colBatchLocation" text="Location" prefWidth="160"/>
+                            </columns>
+                        </TableView>
+
                         <HBox spacing="8" alignment="CENTER_RIGHT">
                             <children>
                                 <Button text="Delete" onAction="#onDelete" styleClass="ghost-button"/>

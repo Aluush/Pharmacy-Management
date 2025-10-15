@@ -57,9 +57,18 @@ public class InventoryController {
     @FXML private TableColumn<InventoryItem, String> colSupplier;
     @FXML private TableColumn<InventoryItem, Integer> colReorder;
 
+    // Batches table
+    @FXML private TableView<InventoryBatchRow> batchTable;
+    @FXML private TableColumn<InventoryBatchRow, String> colBatchNo;
+    @FXML private TableColumn<InventoryBatchRow, String> colBatchExpiry;
+    @FXML private TableColumn<InventoryBatchRow, Integer> colBatchQty;
+    @FXML private TableColumn<InventoryBatchRow, String> colBatchSellPrice;
+    @FXML private TableColumn<InventoryBatchRow, String> colBatchLocation;
+
     @FXML private Label totalItems;
 
     private final ObservableList<InventoryItem> masterData = FXCollections.observableArrayList();
+    private final ObservableList<InventoryBatchRow> batchData = FXCollections.observableArrayList();
     private FilteredList<InventoryItem> filtered;
     private SortedList<InventoryItem> sorted;
 
@@ -88,6 +97,40 @@ public class InventoryController {
         sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(table.comparatorProperty());
         table.setItems(sorted);
+
+        // Batch table setup
+        if (batchTable != null) {
+            colBatchNo.setCellValueFactory(new PropertyValueFactory<>("batchNo"));
+            colBatchExpiry.setCellValueFactory(new PropertyValueFactory<>("expiry"));
+            colBatchQty.setCellValueFactory(new PropertyValueFactory<>("qty"));
+            colBatchSellPrice.setCellValueFactory(new PropertyValueFactory<>("sellPriceFmt"));
+            colBatchLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
+            batchTable.setItems(batchData);
+            batchTable.setPlaceholder(new Label("No batches for the selected item."));
+            batchTable.setRowFactory(tv -> new TableRow<InventoryBatchRow>() {
+                @Override
+                protected void updateItem(InventoryBatchRow row, boolean empty) {
+                    super.updateItem(row, empty);
+                    getStyleClass().removeAll("row-warning", "row-danger");
+                    if (empty || row == null) return;
+                    boolean expired = false;
+                    boolean expSoon = false;
+                    if (row.getExpiry() != null && !row.getExpiry().isBlank()) {
+                        try {
+                            LocalDate exp = LocalDate.parse(row.getExpiry());
+                            long days = ChronoUnit.DAYS.between(LocalDate.now(), exp);
+                            expired = days < 0;
+                            expSoon = days >= 0 && days <= 30;
+                        } catch (Exception ignore) { }
+                    }
+                    if (expired) getStyleClass().add("row-danger");
+                    else if (expSoon) getStyleClass().add("row-warning");
+                }
+            });
+        }
+
+        // Load batches when selection changes
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> loadBatchesFor(newSel));
 
         // Table UX: placeholder, row highlighting, quantity badge
         table.setPlaceholder(new Label("No inventory items."));
@@ -506,6 +549,59 @@ public class InventoryController {
         }
         filterField.requestFocus();
         filterField.positionCaret(filterField.getText() != null ? filterField.getText().length() : 0);
+    }
+
+    // Batches loading
+    private void loadBatchesFor(InventoryItem item) {
+        if (batchTable == null) return;
+        batchData.clear();
+        if (item == null || item.getName() == null || item.getName().isBlank()) {
+            batchTable.setItems(batchData);
+            return;
+        }
+        String sql = "SELECT b.batch_no, b.expiry_date, b.qty_on_hand, b.sell_price, b.location " +
+                     "FROM item_batches b JOIN items i ON b.item_id = i.id " +
+                     "WHERE LOWER(i.name) = LOWER(?) " +
+                     "ORDER BY (CASE WHEN b.expiry_date IS NULL THEN 1 ELSE 0 END), b.expiry_date";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, item.getName());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String batchNo = rs.getString(1);
+                    Date exp = rs.getDate(2);
+                    String expiry = exp != null ? exp.toString() : "";
+                    int qty = rs.getInt(3);
+                    double sell = rs.getDouble(4);
+                    String loc = rs.getString(5);
+                    batchData.add(new InventoryBatchRow(batchNo, expiry, qty, sell, loc));
+                }
+            }
+        } catch (Exception ignore) { }
+        batchTable.setItems(batchData);
+    }
+
+    // Batch view row
+    public static class InventoryBatchRow {
+        private final String batchNo;
+        private final String expiry; // yyyy-MM-dd or empty
+        private final int qty;
+        private final double sellPrice;
+        private final String location;
+
+        public InventoryBatchRow(String batchNo, String expiry, int qty, double sellPrice, String location) {
+            this.batchNo = batchNo == null ? "" : batchNo;
+            this.expiry = expiry == null ? "" : expiry;
+            this.qty = qty;
+            this.sellPrice = sellPrice;
+            this.location = location == null ? "" : location;
+        }
+
+        public String getBatchNo() { return batchNo; }
+        public String getExpiry() { return expiry; }
+        public int getQty() { return qty; }
+        public String getSellPriceFmt() { return String.format("$%.2f", sellPrice); }
+        public String getLocation() { return location; }
     }
 
     // Data model

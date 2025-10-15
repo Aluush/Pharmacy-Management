@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.*;
 import java.sql.*;
 
 public class SalesController {
@@ -137,23 +138,22 @@ public class SalesController {
 
         // If price not provided, try to fetch from inventory
         InvLookup inv = lookupInventoryByName(name);
+        // Determine available quantity preferring non-expired batch stock
+        int available = availableQtyNonExpired(name);
         if (price == null) {
             if (inv != null) {
                 price = inv.price;
                 priceField.setText(String.format(Locale.US, "%.2f", price));
-            } else {
-                setAddStatus("Enter unit price or choose an existing inventory item.", true);
-                return;
             }
         }
-        if (price < 0) {
-            setAddStatus("Unit price must be a non-negative number.", true);
+        if (price == null || price < 0) {
+            setAddStatus("Enter a valid non-negative unit price.", true);
             return;
         }
 
-        // If item exists in inventory, ensure stock sufficiency
-        if (inv != null && qty > inv.quantity) {
-            setAddStatus("Only " + inv.quantity + " in stock for " + name + ".", true);
+        // Ensure stock sufficiency (non-expired FIFO-aware)
+        if (qty > available) {
+            setAddStatus("Only " + available + " available (non-expired) for " + name + ".", true);
             return;
         }
 
@@ -224,11 +224,11 @@ public class SalesController {
             return;
         }
 
-        // Validate inventory availability
+        // Validate stock against non-expired batches (FIFO), fallback to legacy if no batches exist
         for (CartItem ci : cart) {
-            InvLookup inv = lookupInventoryByName(ci.getItem());
-            if (inv != null && ci.getQty() > inv.quantity) {
-                setCheckoutStatus("Insufficient stock for " + ci.getItem() + " (available: " + inv.quantity + ")", true);
+            int available = availableQtyNonExpired(ci.getItem());
+            if (ci.getQty() > available) {
+                setCheckoutStatus("Insufficient non-expired stock for " + ci.getItem() + " (available: " + available + ")", true);
                 return;
             }
         }
@@ -286,6 +286,28 @@ public class SalesController {
                 }
                 psItem.executeBatch();
                 psUpd.executeBatch();
+
+                // FIFO per-batch deduction and inventory movements (SALE), skipping if no batches tracked
+                try (PreparedStatement psUpdateBatch = c.prepareStatement(
+                         "UPDATE item_batches SET qty_on_hand = qty_on_hand - ? WHERE id = ? AND qty_on_hand >= ?");
+                     PreparedStatement psInsertMov = c.prepareStatement(
+                         "INSERT INTO inventory_movements (item_batch_id, qty, movement_type, ref_type, ref_id, created_at, user_id) VALUES (?, ?, 'SALE', 'SALE', ?, CURRENT_TIMESTAMP, NULL)")) {
+                    for (CartItem ci : cart) {
+                        java.util.List<BatchAllocation> allocs = fifoPlan(c, ci.getItem(), ci.getQty());
+                        for (BatchAllocation al : allocs) {
+                            psUpdateBatch.setInt(1, al.qty);
+                            psUpdateBatch.setInt(2, al.batchId);
+                            psUpdateBatch.setInt(3, al.qty);
+                            int updated = psUpdateBatch.executeUpdate();
+                            if (updated == 0) throw new SQLException("Insufficient or modified stock for batch " + al.batchId);
+                            psInsertMov.setInt(1, al.batchId);
+                            psInsertMov.setInt(2, -al.qty);
+                            psInsertMov.setInt(3, saleId);
+                            psInsertMov.addBatch();
+                        }
+                    }
+                    psInsertMov.executeBatch();
+                }
             }
 
             c.commit();
@@ -392,6 +414,77 @@ public class SalesController {
         int id;
         int quantity;
         double price;
+    }
+
+    // Allocation for FIFO
+    private static class BatchAllocation {
+        final int batchId;
+        final int qty;
+        BatchAllocation(int batchId, int qty) { this.batchId = batchId; this.qty = qty; }
+    }
+
+    // Available quantity preferring non-expired batches; falls back to legacy flat inventory if no batches tracked
+    private int availableQtyNonExpired(String name) {
+        if (name == null || name.isBlank()) return 0;
+        String sqlCount = "SELECT COUNT(*) FROM item_batches b JOIN items i ON b.item_id = i.id WHERE LOWER(i.name) = LOWER(?)";
+        String sqlAvail = "SELECT COALESCE(SUM(b.qty_on_hand),0) FROM item_batches b JOIN items i ON b.item_id = i.id " +
+                          "WHERE LOWER(i.name) = LOWER(?) AND (b.expiry_date IS NULL OR b.expiry_date >= CURDATE())";
+        try (Connection c = Database.getConnection()) {
+            boolean hasBatches = false;
+            try (PreparedStatement ps = c.prepareStatement(sqlCount)) {
+                ps.setString(1, name.trim());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) hasBatches = rs.getInt(1) > 0;
+                }
+            }
+            if (hasBatches) {
+                try (PreparedStatement ps = c.prepareStatement(sqlAvail)) {
+                    ps.setString(1, name.trim());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+                return 0;
+            } else {
+                try (PreparedStatement ps = c.prepareStatement("SELECT COALESCE(SUM(quantity),0) FROM inventory_items WHERE LOWER(name)=LOWER(?)")) {
+                    ps.setString(1, name.trim());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+            }
+        } catch (Exception ignore) { }
+        return 0;
+    }
+
+    // Build FIFO allocation plan from non-expired batches within an existing transaction
+    private java.util.List<BatchAllocation> fifoPlan(Connection c, String name, int needed) throws SQLException {
+        java.util.List<BatchAllocation> plan = new java.util.ArrayList<>();
+        if (name == null || name.isBlank() || needed <= 0) return plan;
+        String sql = "SELECT b.id, b.qty_on_hand, b.expiry_date " +
+                     "FROM item_batches b JOIN items i ON b.item_id = i.id " +
+                     "WHERE LOWER(i.name) = LOWER(?) AND (b.expiry_date IS NULL OR b.expiry_date >= CURDATE()) AND b.qty_on_hand > 0 " +
+                     "ORDER BY (CASE WHEN b.expiry_date IS NULL THEN 1 ELSE 0 END), b.expiry_date, b.id";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, name.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                int remain = needed;
+                while (rs.next() && remain > 0) {
+                    int batchId = rs.getInt(1);
+                    int onHand = rs.getInt(2);
+                    int take = Math.min(remain, onHand);
+                    if (take > 0) {
+                        plan.add(new BatchAllocation(batchId, take));
+                        remain -= take;
+                    }
+                }
+                if (remain > 0) {
+                    // Not enough non-expired batches; return empty to signal fallback/no-op
+                    plan.clear();
+                }
+            }
+        }
+        return plan;
     }
 
     // Focus helpers for global search routing
